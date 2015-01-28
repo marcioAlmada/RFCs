@@ -4,9 +4,9 @@ A home for my unfinished RFCs while they are not proposed on [wiki.php.net/rfc](
 
 Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
-# Drafts
+# List
 
-> soon
+- [ ] [![status](https://img.shields.io/badge/Batch Use Declarations-Draft-blue.svg)](https://wiki.php.net/rfc/batch_use_declarations)
 
 # RFC Requests
 
