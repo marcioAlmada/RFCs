@@ -6,7 +6,7 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 # List
 
-- [ ] [![status](https://img.shields.io/badge/Batch Use Declarations-Draft-blue.svg)](https://wiki.php.net/rfc/batch_use_declarations)
+- [ ] [![status](https://img.shields.io/badge/Batch Use Declarations-Draft-blue.svg)](https://wiki.php.net/rfc/group_use_declarations)
 
 # RFC Requests
 
