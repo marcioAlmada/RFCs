@@ -1,7 +1,7 @@
 ====== PHP RFC: Group Use Declarations ======
   * Date: 2015-01-28
   * Author: Márcio Almada, marcio.web2@gmail.com
-  * Status: Draft
+  * Status: Under Discussion
   * First Published at: http://wiki.php.net/rfc/group_use_declarations
   * Patch: https://github.com/php/php-src/pull/1005
 
@@ -71,7 +71,7 @@ This is also a real use case. Check out the Laravel source code:
   * [[https://github.com/laravel/framework/blob/5afdac39290bc38d729830190f17581b60b08502/src/Illuminate/Log/Writer.php#L5-L9|https://github.com/laravel/framework/blob/4.2/src/Illuminate/Log/Writer.php#L5-L9]]
 
 === Non Mixed Use Declarations ===
-As expected, non mixed group use declarations are supported:
+As expected, non mixed group use declarations are also supported:
 
 <code php>
 // Current use syntax:
@@ -88,8 +88,6 @@ use const foo\math\{ PI, E, GAMMA, GOLDEN_RATIO };
 === Mixed Use Declarations ===
 
 The current implementation of namespaces does not allow mixed imports of functions, constants and classes. The proposed implementation would allow mixed imports like this:
-
-Current namespace implementation does not allow mixed imports of functions, constants and classes. The proposed implementation would allow mixed imports like this:
 
 <code php>
 // Current use syntax:
@@ -134,7 +132,25 @@ use Symfony\Component\Console\Question\{
 ===== About The Syntax Choice =====
 The syntax chosen is inline with the current [[http://php.net/traits|trait adaptation]] syntax to make it look and feel similar to existing PHP standards. Such design choice allows the feature to stay familiar and intuitive to most PHP user base.
 
-===== Optional: Nested Group Use Declarations =====
+===== Options =====
+
+==== Trailing T_NS_SEPARATOR ====
+During research phase a syntax variant **without** an enforced T_NS_SEPARATOR emerged as a debatable option:
+
+<code php>
+// with trailing "\"
+
+use Foo\Bar\Baz\{ ClassA, ClassB, ClassC, ClassD };
+
+// vs
+// without trailing "\"
+
+use Foo\Bar\Baz{ ClassA, ClassB, ClassC, ClassD };
+</code>
+
+This shall be addressed on discussion phase: should a trailing "\" (T_NS_SEPARATOR) be enforced or removed from syntax?
+
+==== Nesting ====
 As the author of this RFC, I consider the **nesting** option **too complex** to be introduced. But since many people mentioned this **possibility**, it will be put into the discussion so the community has a chance to appoint.
 
 **Nesting** would allow the following use case:
@@ -142,11 +158,14 @@ As the author of this RFC, I consider the **nesting** option **too complex** to 
 <code php>
 use Symfony\Component\Console\{
   Helper\Table,
-  Input\{ ArrayInput, InputInterface }
+  Input\{ ArrayInput, InputInterface },
   Output\{ NullOutput, OutputInterface },
   Question\{ Question, ChoiceQuestion, ConfirmationQuestion }
 };
 </code>
+
+This shall be addressed on discussion phase: should nested group use declarations be allowed?
+
 
 ===== Backward Incompatible Changes =====
 There is no BC breaks with current implementation or feature concepts.
@@ -161,6 +180,7 @@ This RFC is backwards compatible with previous PHP releases. It's worth to add t
 
 ===== Open Issues =====
   * Should nested group use declarations be allowed?
+  * Should trailing "\" (T_NS_SEPARATOR) be enforced or removed from syntax?
 
 ===== Unaffected PHP Functionality =====
 Original namespace implementation is not affected by the addition of group use declarations. Current syntax would still be valid.
