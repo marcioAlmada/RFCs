@@ -4,7 +4,7 @@ A home for my unfinished RFCs while they are not proposed on [wiki.php.net/rfc](
 
 Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
-# Ative RFCs
+# Active RFCs
 
 ## Group Use Declarations [![status](https://img.shields.io/badge/Status-Under_Discussion-yellow.svg?style=flat-square)](https://wiki.php.net/rfc/group_use_declarations)
 
