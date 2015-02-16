@@ -6,9 +6,13 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 # Active RFCs
 
-## Group Use Declarations [![status](https://img.shields.io/badge/Status-Under_Discussion-yellow.svg?style=flat-square)](https://wiki.php.net/rfc/group_use_declarations)
+## Group Use Declarations [![status](https://img.shields.io/badge/Status-Voting-green.svg?style=flat-square)](https://wiki.php.net/rfc/group_use_declarations)
 
 > This RFC aims to improve current PHP namespace implementation by introducing the concept of Group Use Declarations.
+
+## Context Sensitive Lexer [![status](https://img.shields.io/badge/Status-Draft-blue.svg?style=flat-square)](https://wiki.php.net/rfc/context_sensitive_lexer)
+
+> PHP currently has around **64** globally reserved words that not infrequently clash with legit alternatives to userland API declarations. This RFC proposes a solution for that by adding a **context sensitive lexer** with support for **semi-reserved** words.
 
 ## Requests
 
