@@ -14,11 +14,15 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 > PHP currently has around **64** globally reserved words that not infrequently clash with legit alternatives to userland API declarations. This RFC proposes a solution for that by adding a **context sensitive lexer** with support for **semi-reserved** words.
 
+## Strict Argument Count On Function Calls [![status](https://img.shields.io/badge/Status-Draft-blue.svg?style=flat-square)](https://wiki.php.net/rfc/strict_argcount)
+
+> This RFC proposes to conditionally add a strict argument count check for function calls on PHP7, being sensitive towards implementations already depending on the variable-length argument lists API.
+
 ## Requests
 
-If you have an idea for an RFC that would benefit community but don't want to do the hard work
+If you have an idea for an RFC that would benefit community but have know idea how to implement it yourself
 or don't have enough time, please open an issue describing your idea and, **maybe**,
-if I like it, I could create the RFC.
+after some discussion, I could create the RFC.
 
 ## Copyright
 
