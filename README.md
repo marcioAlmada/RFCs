@@ -16,7 +16,7 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 # Accepted RFCs
 
-### Group Use Declarations [![status](https://img.shields.io/badge/Status-Accepted-green.svg?style=flat-square)](https://wiki.php.net/rfc/group_use_declarations)
+### Group Use Declarations [![status](https://img.shields.io/badge/Status-Accepted-green.svg?style=flat-square)](https://wiki.php.net/rfc/group_use_declarations) [![status](https://img.shields.io/badge/Merged-✓-grey.svg?style=flat-square)](https://github.com/php/php-src/pull/1005)
 
 > This RFC aims to improve current PHP namespace implementation by introducing the concept of Group Use Declarations.
 
