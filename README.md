@@ -6,19 +6,24 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 # Active RFCs
 
-### Context Sensitive Lexer [![status](https://img.shields.io/badge/Status-Voting-green.svg?style=flat-square)](https://wiki.php.net/rfc/context_sensitive_lexer)
-
-> PHP currently has around **64** globally reserved words that not infrequently clash with legit alternatives to userland API declarations. This RFC proposes a solution for that by adding a **context sensitive lexer** with support for **semi-reserved** words.
-
-### Strict Argument Count On Function Calls [![status](https://img.shields.io/badge/Status-Discussion-yellow.svg?style=flat-square)](https://wiki.php.net/rfc/strict_argcount)
-
-> This RFC proposes to conditionally add a strict argument count check for function calls on PHP7, being sensitive towards implementations already depending on the variable-length argument lists API.
+> Waiting for PHP 7.1 season
 
 # Accepted RFCs
+
+### Context Sensitive Lexer [![status](https://img.shields.io/badge/Status-Accepted-green.svg?style=flat-square)](https://wiki.php.net/rfc/context_sensitive_lexer)
+
+> PHP currently has around **64** globally reserved words that not infrequently clash with legit alternatives to userland API declarations. This RFC proposes a solution for that by adding a **context sensitive lexer** with support for **semi-reserved** words.
 
 ### Group Use Declarations [![status](https://img.shields.io/badge/Status-Accepted-green.svg?style=flat-square)](https://wiki.php.net/rfc/group_use_declarations) [![status](https://img.shields.io/badge/Merged-✓-grey.svg?style=flat-square)](https://github.com/php/php-src/pull/1005)
 
 > This RFC aims to improve current PHP namespace implementation by introducing the concept of Group Use Declarations.
+
+
+# Dead
+
+### Strict Argument Count On Function Calls [![status](https://img.shields.io/badge/Status-Withdrawn-ccc.svg?style=flat-square)](https://wiki.php.net/rfc/strict_argcount)
+
+> This RFC proposes to conditionally add a strict argument count check for function calls on PHP7, being sensitive towards implementations already depending on the variable-length argument lists API.
 
 ## Requests
 

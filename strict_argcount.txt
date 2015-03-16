@@ -1,9 +1,11 @@
 ====== PHP RFC: Strict Argument Count On Function Calls ======
-  * Version: 0.6
+  * Version: 0.6.2
   * Date: 2015-02-20
   * Author: Márcio Almada
-  * Status: Under Discussion
+  * Status: Withdraw
   * First Published at: http://wiki.php.net/rfc/strict_argcount
+
+=> The RFC was withdraw due to many controversial points and overall rejection and won't be proposed again by the RFC author. The RFC author advises to not revive this RFC as it was already rejected. Even if you think you have a much better idea, think twice.
 
 ===== Introduction =====
 
@@ -37,7 +39,7 @@ call_user_func_array("fn", [1, 2, 3]); // Warning
 // Warning: fn() expects at most 1 parameter, 3 given, defined in %s on line %u and called in %s on line %u
 </code>
 
-The implementation is aware of the native ''variable-lengh argument list API'' and won't emit any warning if the called function or method is explicitly variadic or implemented with:
+The implementation is aware of the native ''variable-length argument list API'' and won't emit any warning if the called function or method is explicitly variadic or implemented with:
 
   * ''func_get_arg();''
   * ''func_get_args();''
@@ -127,6 +129,19 @@ Variadic functions are explicitly implemented to handle variable-length argument
 
 This RFC considers that anonymous functions are not intended to have a formal signature and should skip the exceeding argument count check.
 
+==== About Callbacks, __invoke And Dynamic Calls ====
+
+This RFC considers that functions and objects passed as callbacks (relates to ''invoke'') should not be affected by the exceeding argument count check,
+as well as dynamic function calls. So the following code is not affected:
+
+<code php>
+$unknownCallable($arg, $arg, $arg);
+$someObj->$unknownDispatch($arg, $arg, $arg);
+$class::$unknownDispatch($arg, $arg, $arg);
+</code>
+
+This is a concession to provide a good alternative to people calling unknown functions and doing method|functional dispatching.
+
 ==== About Obfuscated ''func_get_arg*()'' Calls ====
 
 Current patch is not aware of "obfuscated" calls to ''func_get_arg()'' and ''func_get_args()'':
@@ -200,7 +215,8 @@ $comparator->assertEquals($value, $actual[$key], $delta, $canonicalize, $ignoreC
 If you care to analyze the [[https://github.com/sebastianbergmann/comparator/blob/master/src/ArrayComparator.php#L52-L80|context]], you will notice that the ''$processed'' argument is declared as a reference on the caller's scope and while being passed to the ''ScalarComparator::assertEquals'' method it's being completely ignored! This is probably not the intended behavior (possibly a bug). The other warning was also caused by a obvious mistake.
 
 It would take less than 4 minutes to fix this and get **PHPUnit** ready for PHP7, in case the proposal is accepted. It's worth to
-say that **PHPUnit** has a big codebase (counting all the dependencies) and only **2** warnings related to this RFC were emitted.
+say that **PHPUnit** has a big code base (counting all the dependencies) and only **2** warnings related to this RFC were emitted,
+according to the test suite coverage.
 
 ==== Synfony Packages ====
 
@@ -261,7 +277,7 @@ This is how the method was [[https://github.com/symfony/symfony/blob/2.7/src/Sym
 $descriptors = $this->processPipes->getDescriptors($this->outputDisabled);
 </code>
 
-Synfony has very high quality packages we all rely on a daily basis, but this clearly was a human mistake that could have been avoided if PHP was helping instead of hiding the problems.
+Synfony has very high quality packages we all rely on a daily basis, but this clearly was a mistake that could have been avoided if PHP was helping instead of hiding the problems.
 
 === All Other Symfony Components ===
 
@@ -325,9 +341,9 @@ After fixing this error, other errors appeared. Hence there is no numbers for **
 
 ==== Wordpress ====
 
-A disaster was being already announced around this patch against **Wordpress**. In fact, running the test suite resulted in a slay of **4.597** warnings directly related to the proposed RFC. **But** after some heuristics it was noticeable that most warnings had a common cause.
+**Wordpress** test suite is basically composed by integration tests and a single warning on the code base is usually multiplied by thousands. At first this might sound scary: running the **Wordpress** test suite resulted in **4.597** warnings directly related to the proposed RFC. **But** after some heuristics it was noticeable that the warnings had a common cause:
 
-I parsed the output file to remove duplicated warnings and the result was a derisive number of **only 27 unique warnings**. You can see the condensed list of unique warnings below:
+I parsed the output file from the test case to detect **repeated warnings** and the result was a derisive number of **only 27 unique warnings**. In practice it means that **27** warnings were found, not **4.597**. You can see the condensed list of unique warnings below:
 
 <code>
 Warning: wp_maybe_load_widgets() expects 0 parameters, 1 given, defined in %s/wp-includes/functions.php on line 3227 and called in %s/wp-includes/plugin.php on line 496
@@ -359,7 +375,7 @@ Warning: twentyfifteen_category_transient_flusher() expects 0 parameters, 1 give
 Warning: delete_get_calendar_cache() expects 0 parameters, 1 given, defined in %s/wp-includes/general-template.php on line 1758 and called in %s/wp-includes/plugin.php on line 496
 </code>
 
-After checking case by case among the **27 unique** warnings found, the conclusion is that **all of them** are a result of **human mistake** from some code refactory that left function calls with residual parameters behind. This could be fixed in less than 1 hour.
+After checking case by case among the **27** warnings found, the conclusion is that **all of them** are a result of **human mistake** from some code refactory that left function calls with residual parameters behind. This could be fixed in less than 1 hour.
 
 => You can see the raw **Wordpress** test output [[https://gist.githubusercontent.com/marcioAlmada/959b45aa561503499bc0/raw/strict-argcount-impact-wordpress-raw.txt|here]].
 
@@ -367,7 +383,7 @@ After checking case by case among the **27 unique** warnings found, the conclusi
 
 During the tests it became **clearly measurable** that the proposed strict argument count check **won't be an issue**. Actually, it's quite the opposite. It **will** help to **increase** PHP code **quality** from PHP7 and forward as all warnings were useful to catch mistakes or even bugs.
 
-=> I tested many other packages and will add other results on a blog post if necessary, so this RFC doesn't become too long.
+=> Many other packages were tested and resulted in very similar results, and in the end the ones that presented more issues or unique properties were listed here. For instance, **Composer** was chosen because it converts all error levels to exceptions and **Wordpress** was chosen for having a massive procedural code base and popularity...
 
 ===== Hassle Factor =====
 
@@ -404,14 +420,12 @@ This has been considered an acceptable "PHPism" but would now require a better s
 
 > Tweet: I'm torn. On the 1 hand, we have a valid use case. On another: we should update our interface.
 
-**This is perfectly fixable** though. But it would require package maintainers to release **minor** and sometimes **major** versions while evolving interfaces to accommodate new use cases.
+**This is perfectly fixable** though. The options are:
+
+  * Update the bad designed interface and release **minor** and sometimes **major** versions while evolving interfaces to accommodate new use cases.
+  * Convert the offending method call into a dynamic method call as the exceeding argument check will not be done for this kind of call.
 
 => As the author of the RFC I'd say it's not a bad thing. But in fairness to release managers of PHP packages out there, this should also be discussed.
-
-===== Open Issues =====
-
-  * What needs to be improved before reaching voting phase?
-  * What other libraries/projects should be bested for BC breaks measurements?
 
 ===== Proposed PHP Version(s) =====
 
@@ -419,17 +433,26 @@ This is proposed for the next PHP x, which at the time of this writing would be 
 
 ===== Vote =====
 
-As this is a language change, the main voting (yes/no) requires a 2/3 majority to pass.
+Vote started on 15th March and ends on 29th March.
 
-We'll also have a simultaneous secondary voting to decide what error level should be emitted: ''E_WARNING'', ''E_STRICT'' or ''E_NOTICE''.
+==== Feature ====
 
-==== Feature ===
+As this is a language change, the main voting requires a 2/3 majority to pass.
 
-  add voting doodle here
+<doodle title="Should PHP7 warn about exceeding argument count on function calls?" auth="marcio" voteType="single" closed="true">
+   * Yes
+   * No
+</doodle>
 
-==== Error Level ===
+==== Error Level ====
 
-  add voting doodle here
+This is a secondary voting to decide what error level should be emitted: ''E_WARNING'' or ''E_NOTICE''.
+A ''50% + 1'' majority is required. In the event of a tie the RFC author will take the final decision.
+
+<doodle title="What's the error level that should be emitted?" auth="marcio" voteType="single" closed="true">
+   * E_WARNING
+   * E_NOTICE
+</doodle>
 
 ===== Patch =====
 
@@ -441,6 +464,7 @@ We'll also have a simultaneous secondary voting to decide what error level shoul
 
   * Dynamic calls to ''func_get_arg*'' won't fatal anymore, the proposal now generates a warning.
   * ''E_DEPRECATE'' option was removed because it implies future changes and if somebody is willing to push for that, another RFC should be created.
+  * ''E_STRICT'' option was removed so we don't conflict conceptually with the [[https://wiki.php.net/rfc/reclassify_e_strict|Reclassify E_STRICT]] RFC.
 
 ===== Changelog =====
 
@@ -450,3 +474,5 @@ We'll also have a simultaneous secondary voting to decide what error level shoul
   * 0.4: Warning instead of fatal on dynamic func_get_arg*() calls, real world examples, clarify anonymous functions behavior
   * 0.5: Define voting and voting options
   * 0.6: Remove E_DEPRECATED option, add E_NOTICE option
+  * 0.6.1: Remove E_STRICT voting option
+  * 0.6.2: Remove runtime check for __invoke and explicit dynamic calls
