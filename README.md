@@ -10,7 +10,7 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 # Accepted RFCs
 
-### Context Sensitive Lexer [![status](https://img.shields.io/badge/Status-Accepted-green.svg?style=flat-square)](https://wiki.php.net/rfc/context_sensitive_lexer)
+### Context Sensitive Language [![status](https://img.shields.io/badge/Status-Accepted-green.svg?style=flat-square)](https://wiki.php.net/rfc/context_sensitive_lexer) [![status](https://img.shields.io/badge/Merged-✓-grey.svg?style=flat-square)](https://github.com/php/php-src/pull/1221)
 
 > PHP currently has around **64** globally reserved words that not infrequently clash with legit alternatives to userland API declarations. This RFC proposes a solution for that by adding a **context sensitive lexer** with support for **semi-reserved** words.
 
