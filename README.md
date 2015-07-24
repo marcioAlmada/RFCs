@@ -27,7 +27,10 @@ Suggestions and pull requests with RFC improvements are encouraged :octocat:
 
 ## Requests
 
-If you have an idea for an RFC that would benefit community but have know idea how to implement it yourself, please open an issue describing your idea and, **maybe**, after some discussion, I could create the RFC.
+If you have an idea for an RFC that could benefit community but have no clue how to do it all by yourself, please open an issue describing your proposal and, **maybe**, after some discussion, I could create the RFC. Keep in mind that:
+
+- You will have to be really convincing. RFCs are hardwork, don't expect me to spend time and resources if you can't prove your idea is really useful, do a research first.
+- I may not accept all the RFC suggestions but I can help you navigate the proccess or seek for orientation in case you decide to write your first RFC.
 
 ## Copyright
 
