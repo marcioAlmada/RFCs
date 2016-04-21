@@ -8,7 +8,7 @@
 ===== Introduction =====
 
 This RFC proposes an evolution of the **callable** type, scoped to argument lists. This should allow more detailed declarations
-of **callable** "typehints" - including their **arity**, **argument types** and **return type**.
+of **callable** type declarations - including their **arity**, **argument types** and **return type**.
 
 Here is one basic comparison between a simple **callable** and a detailed **callable prototype** declaration:
 
@@ -45,7 +45,7 @@ reduce(1, 2, function($a, $b, $c) {
 // TypeError: Argument 3 passed to reduce() must be callable(int, int):int, callable($a, $b, $c) given...
 </code>
 
-This concept is also present in other languages, commonly referred as **function prototypes** or **function interfaces**.
+This concept is also present in other languages, commonly referred as **function prototypes**, **function types**.
 
 > NOTE: This RFC is **not** related to "generics".
 
@@ -57,47 +57,45 @@ Callable types might be particularly useful to write more robust callback based 
 
 === Better Error Messages ===
 
-<code php>
-// before
-</code>
-
-<code php>
-// after
-</code>
+The very first example of this RFC already illustrates well why a detailed "Type Error" offers better debuggability when compared to
+a trail of warnings and notices. In case warnings and notices get converted to exceptions, the scenario gets even less friendly
+as problems would be revealed one by one.
 
 === Safety Before Side Effects ===
 
 While callable types can offer more debug friendlier messages, there are other factor that could favor earlier
-failures approach. In some cases, a callback might create or precede a side effect.
-
-Specifying a more constrained callable type allows a given routine to fail before an operation that creates side effect:
-
-<code php>
-// example of a rejected callable that shows early failure
-</code>
+failures approach. The objective of a callable type is to know when a callable is safe to execute before executing it.
+Specifying a more constrained callable type allows a given routine to fail before the next step of some important operation.
 
 This certainly can be achieved without callable types: perhaps using reflection or manual type checking of return values
-but certainly callable types can make this kind of situation less tedious and therefore more productive.
+(with "is_<type>()" functions or "instanceof"). But certainly callable types can make this kind of situation less tedious.
 
 === Self Documented Code ===
 
-It's common to see callback based libraries doing their best to declare the callable signatures on docblocks, hoping that
+It's common to see callback based libraries doing their best to declare the callable signatures on doc comments, hoping that
 the consumers will be able to figure out what to pass around:
 
 <code php>
-// before
+/**
+ * @param  array                  $array
+ * @param  callable($key, $value) $callback
+ */
+function array_walk(array $array, callable $callback) {
+    // ...
+}
 </code>
 
-With callable types, the codebase simply becomes much closer to "self documented", so this is not contrived to runtime checks
-that will assist the user land.
+With callable types, the codebase simply becomes much closer to "self documented":
 
 <code php>
-// after
+function array_walk(array $array, callable($key, $value) $callback) {
+    // ...
+}
 </code>
 
 === Empower Anonymous Functions ===
 
-Currently the only possible way to formally specify the type information of a callable is using classes:
+Currently the only possible way to formally specify the type information of a callable is by using classes:
 
 <code php>
 // before
@@ -121,8 +119,8 @@ $crunched = crunch_data(
 );
 </code>
 
-Unfortunately, this solution completely excludes anonymous functions usage. But with a more specific signature,
-callable types could work as an interface over **__invoke**:
+Unfortunately, this solution completely excludes anonymous functions as they can't implement any interface. But with a more
+specific signature, callable types could work as requirements over the `<nowiki>__invoke</nowiki>` method of callables:
 
 <code php>
 // after
@@ -139,29 +137,9 @@ $crunched = crunch_data([1 => 2, 3 => 4], function(int $left, int $right): int {
 });
 </code>
 
-==== Why Not? ====
-
-One might say that function prototypes "does not fit the PHP loosely typed model". This might be true to part of the
-community, at some extent, but it's possible to affirm that PHP already supports function prototypes - but their potential is
-currently 'confined' inside interfaces and abstract classes definitions:
-
-<code php>
-interface FooInterface {
-    function foo(A $a, B $b): C; // this is a function prototype, part of an interface
-}
-
-abstract class Foo {
-    function bar(A $a, B $b): C; // this is a function prototype too
-}
-</code>
-
-==== Arity ====
-
-=> Add case by case + examples with less required args, more required args, optional args...
-
 ==== Variance and Signature Validation ====
 
-Variance is supported and adheres to LSP. This means that whenever function of type ''F'' is expected, any function that takes equal or more general input than ''F'' and gives equal or narrower output than ''F'', can be considered of type ''F''. Classes in argument/return type of a callable typehint are a subject to variance, primitives are not.
+Variance is supported and adheres to LSP. This means that whenever function of type ''F'' is expected, any function that takes equal or more general input than ''F'' and gives equal or narrower output than ''F'', can be considered of type ''F''. Classes in argument/return type of a callable type declarations are a subject to variance, primitives are not.
 
 Examples:
 <code php>
@@ -205,8 +183,8 @@ When callable type is nested (when you have ''callable(callable(A))'') variance 
 
 ==== Syntax Choices ====
 
-The syntax is similar to the one already used to declare prototypes on interfaces and abstract classes member, and should
-look meaningful to anyone who already knows how to declare a PHP interface. There are only two minor distinctions:
+The proposed syntax is similar to what we have on interfaces and abstract methods, and will look meaningful
+to anyone who already knows how to declare a PHP interface. There are only two minor distinctions:
 
 While declaring a callable type, it's possible to omit the argument names from argument lists when a given argument has type information.
 The argument names can be valuable, but there are cases they represent unnecessary verbosity. Hence why they can be omitted:
@@ -219,17 +197,7 @@ function foo(callable(string $string_a, string $string_b):string $callback) {}
 function foo(callable(string, string):string $callback) {}
 </code>
 
-The other distinction is that empty argument lists can be omitted:
-
-<code php>
-// the declarations below are synonyms:
-
-function foo(callable():string $callback) {}
-
-function foo(callable:string $callback) {}
-</code>
-
-It's already common to see analogous syntax inside docblocks even though there are no regnant conventions, like:
+It's already common to see analogous syntax inside doc comments even though there are no regnant conventions:
 
 <code php>
 /**
@@ -240,6 +208,69 @@ It's already common to see analogous syntax inside docblocks even though there a
  */
 function foo($action, callable $callback) {
   // ...
+}
+</code>
+
+==== Why Not? ====
+
+One might say that function prototypes "does not fit the PHP loosely typed model". This might be true to part of the
+community, at some extent. Anyway, it's possible to affirm that PHP already supports function prototypes - but their potential is
+currently "confined" inside interfaces and abstract class definitions:
+
+<code php>
+interface FooInterface {
+    function foo(A $a, B $b): C; // this is a function prototype, part of an interface
+}
+
+abstract class Foo {
+    function bar(A $a, B $b): C; // this is a function prototype too
+}
+</code>
+
+==== Why Not Add Callable Types Through Interfaces ====
+
+During off list discussions, it was proposed to add callable types to PHP by hacking the interface system:
+
+<code php>
+interface FooCallback extends Callable {
+    function __invoke(int $i, string $str, FooClass $foo) : ReturnType;
+}
+</code>
+
+The RFC authors rejected the idea because of the many design problems this would cause. For example, the following situation would completely
+**break anonymous functions support**:
+
+<code php>
+interface FooCallback extends Callable {
+    function someExtraMethod();
+    function __invoke(int $i, string $str, FooClass $foo) : ReturnType;
+}
+</code>
+
+In order to amend this design issue, we would have to add many weird checks to PHP interfaces just to accommodate something that conceptually
+(at least for PHP) doesn't pertain to interfaces:
+
+    - interfaces extending Closure (or abstract classes implementing any interface extending closure) would have to be forbidden to declare constants or any extra method other than invoke.
+    - interfaces extending any interface that extends Closure (or abstract classes that...) would need the same checks as above.
+    - in case an interface has only invoke all rules to determine compatibility would change.
+
+The obvious conclusion is that extending the behavior of `callable` should **not** require deep changes (or any change at all) on
+the current interface system. The fact that objects can become callables by having an `<nowiki>__invoke</nowiki>` method is just a detail.
+
+As a side note, any comparison with callable types and interfaces on this RFC is for didactic purpose.
+
+==== When To Use Return Types On Callable Types ====
+
+It should be noted that, while perfectly valid, adding return types to callable types may not be as useful as it seems at a first sight.
+Perhaps this bit is only valuable if the returned value of the callback is really going to be used by the receiver, otherwise the recommendation
+is to simply skip it.
+
+It's also notable that some types like 'void' should never be used as a callable return type. They simply impose unnecessary restrictions
+to callables in any imaginable use case. E.g:
+
+<code php>
+function foo(callable($a, $b):void $callback) {
+  //...
 }
 </code>
 
@@ -255,19 +286,11 @@ The proposal targets PHP 7.1.
 
 ==== Performance ====
 
-The addition of more specific callable types definitions will not offer any penalty to the "simpler" callable already in use.
-
-This is a synthetic benchmark between a function using a "simple callable" and a function using a "complex callable" on it's argument list:
-
-<code>
-// benchmark code
-</code>
-
-=> The loss will probably be negligible so we'll need to count CPU instructions to show the difference.
+The performance difference between argument lists with "complex callables" vs "simple callables" is negligible.
 
 ==== To Opcache ====
 
-=> ...
+Currently, the patch works with opcache. Any possible further break should be easily fixable anyway.
 
 ===== Unaffected PHP Functionality =====
 
@@ -276,16 +299,16 @@ The RFC merely augments how callable can be declared.
 
 ===== Future Scope =====
 
-==== Named Callabe Types ====
+==== Named Callable Types ====
 
 Named callable types were deliberately left out the current proposal. The rationale behind this decision is that
-most callable types are very transient, so the proposed inlined syntax will solve 90% of the use cases. This bit could be
-added through another RFC.
+most callable types are very transient, so the proposed inlined syntax will solve 90% of the use cases.
 
-Another reason is that depending on how the Union Types RFC is designed it might include named types and, naturally,
-named callable types would be supported.
+Another reason is that depending on how the [[https://wiki.php.net/rfc/union_types|Union Types]] RFC is designed it
+might include named types and, naturally, named callable types would be supported. This bit could be added through another RFC,
+and probably should, because if typedefs are to appear in PHP they should work not only for callable types but for all other types as well.
 
-The following could also be an option for a dedicated named callable types syntax:
+The following could also be an option for a dedicated named callable type syntax if union types (or any other RFC introducing type aliasing) gets rejected:
 
 <code php>
 callable NodeComparator(Node $left, Node $right): bool;
@@ -299,30 +322,44 @@ function sort_nodes(array $nodes, NodeComparator $predictor) {
 }
 </code>
 
+Besides that, even with named callable types support, inlined callable types could be a way to keep the type unexposed from public API
+while PHP lacks first class packages.
+
 ==== Reflection API ====
 
-A reflection API will be proposed in case the RFC is approved.
+An extension to the reflection API will be proposed in case the RFC is approved.
 
-===== Proposed Voting Choices =====
+===== Votes =====
 
-=> ...
+This RFC requires a 2/3 majority to pass.
 
 ===== Patches and Tests =====
 
-Links to any external patches and tests go here.
+The work in progress of the implementation can be found at https://github.com/php/php-src/pull/1633
 
-If there is no patch, make it clear who will create a patch, or whether a volunteer to help with implementation is needed.
+The patch can be tested through https://3v4l.org
 
-Make it clear if the patch is intended to be the final patch, or is just a prototype.
+===== Known Issues =====
 
-===== Implementation =====
+==== Syntax ====
 
-=> ...
+There is a known syntax conflict with callable types that omit argument names, as in:
+
+<code php>
+function func(callable(int) $callback) {
+ //...
+}
+// syntax error, unexpected T_INT_CAST in {file} on line 1
+</code>
+
+The following pull request would fix these argument list edge cases https://github.com/php/php-src/pull/1667
 
 ===== References =====
 
-=> ...
+Languages that have this same concept (with inlined definitions or not):
 
-===== Rejected Features =====
-
-=> ...
+    - Python has annotation based callable types https://www.python.org/dev/peps/pep-0484/#callable
+    - Golang https://tour.golang.org/moretypes/21
+    - Rust ("where" is a bit verbose) https://doc.rust-lang.org/book/closures.html#taking-closures-as-arguments
+    - Scala
+    - Swift https://developer.apple.com/library/ios/documentation/Swift/Conceptual/Swift_Programming_Language/Types.html
